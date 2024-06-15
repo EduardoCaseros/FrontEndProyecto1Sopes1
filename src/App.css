@@ -1,0 +1,11 @@
+.logo {
+  height: 6rem;
+}
+
+.logo.react {
+  margin-left: 1rem;
+}
+
+.read-the-docs {
+  margin-top: 2rem;
+}
