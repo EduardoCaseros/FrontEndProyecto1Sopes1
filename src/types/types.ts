@@ -40,3 +40,7 @@ export interface ChildProcess {
     ram: RamData;
   }
   
+
+  export interface DeleteProcess{
+    pid: string;
+  }

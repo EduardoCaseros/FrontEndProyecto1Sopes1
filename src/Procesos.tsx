@@ -1,7 +1,24 @@
 import { useState } from 'react';
-import { Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Collapse } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Collapse,
+  Button,
+  TextField,
+  Alert,
+} from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import useFetchSystemData from './Hooks/useRamData';
+import { handleCreateClick, handleDeleteClick } from './Hooks/CRUDProceso';
+import { mapStateToText } from './types/estados';
 
 interface ChildProcess {
   name: string;
@@ -13,8 +30,12 @@ interface ChildProcess {
 
 
 function Processes() {
-  const { data, loading, error } = useFetchSystemData('http://127.0.0.1:3000/livedata');
+  const { data, loading, error } = useFetchSystemData();
   const [openPids, setOpenPids] = useState<number[]>([]);
+  const [pidToDelete, setPidToDelete] = useState<number | ''>('');
+  const [createMessage, setCreateMessage] = useState<string | null>(null);
+  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+
 
   if (loading) {
     return <Typography variant="h6">Loading...</Typography>;
@@ -37,9 +58,53 @@ function Processes() {
     );
   };
 
+  const handleCreate = async () => {
+    const message = await handleCreateClick();
+    setCreateMessage("Proceso creado: " +message);
+    setTimeout(() => {
+      setCreateMessage(null);
+    }, 3000);
+  };
+
+  const handleDelete = async () => {
+    if (pidToDelete !== '') {
+      const message = await handleDeleteClick(pidToDelete);
+      setDeleteMessage(message);
+      setTimeout(() => {
+        setDeleteMessage(null);
+      }, 3000);
+    }
+  };
+
   return (
     <Box p={2}>
       <Typography variant="h4">Procesos</Typography>
+      <Box mb={2} display="flex" alignItems="center">
+        <Button variant="contained" color="primary" onClick={handleCreate}>
+          Crear
+        </Button>
+        <TextField
+          label="PID"
+          type="number"
+          value={pidToDelete}
+          onChange={(e) => setPidToDelete(Number(e.target.value))}
+          sx={{ mx: 2 }}
+        />
+        <Button variant="contained" color="secondary" onClick={handleDelete}>
+          Eliminar
+        </Button>
+        
+      </Box>
+      {createMessage && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {createMessage}
+        </Alert>
+      )}
+      {deleteMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {deleteMessage}
+        </Alert>
+      )}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -49,8 +114,7 @@ function Processes() {
               <TableCell>PID</TableCell>
               <TableCell>PID Padre</TableCell>
               <TableCell>Estado</TableCell>
-              <TableCell>RAM</TableCell>
-              <TableCell>Usuario</TableCell>
+              
             </TableRow>
           </TableHead>
           <TableBody>
@@ -68,10 +132,8 @@ function Processes() {
                   </TableCell>
                   <TableCell>{process.name}</TableCell>
                   <TableCell>{process.pid}</TableCell>
-                  <TableCell>{process.pidPadre}</TableCell>
-                  <TableCell>{process.state}</TableCell>
-                  <TableCell>{process.ram}</TableCell>
-                  <TableCell>{process.user}</TableCell>
+                  <TableCell>{process.pidPadre}</TableCell>                  
+                  <TableCell>{mapStateToText(process.state)}</TableCell>
                 </TableRow>
                 {process.child && (
                   <TableRow>
@@ -96,7 +158,7 @@ function Processes() {
                                   <TableCell sx={{ bgcolor: 'rgba(240, 240, 240, 0.5)' }}>{childProcess.name}</TableCell>
                                   <TableCell sx={{ bgcolor: 'rgba(240, 240, 240, 0.5)' }}>{childProcess.pid}</TableCell>
                                   <TableCell sx={{ bgcolor: 'rgba(240, 240, 240, 0.5)' }}>{childProcess.pidPadre}</TableCell>
-                                  <TableCell sx={{ bgcolor: 'rgba(240, 240, 240, 0.5)' }}>{childProcess.state}</TableCell>
+                                  <TableCell sx={{ bgcolor: 'rgba(240, 240, 240, 0.5)' }}>{mapStateToText(childProcess.state)}</TableCell>
                                 </TableRow>
                               ))}
                             </TableBody>
