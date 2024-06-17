@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { SystemData } from '../types/types';
 import axios from 'axios';
 
-const useFetchSystemData = (url= 'http://127.0.0.1:3000/livedata', interval = 1000) => {
+//const useFetchSystemData = (url= 'http://127.0.0.1:3000/livedata', interval = 1000) => {
+const useFetchSystemData = (url= 'http://backend:3000/livedata', interval = 1000) => {
   const [data, setData] = useState<SystemData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
